@@ -1,0 +1,6 @@
+#Request: non mettiamo nulla, il client chiede semplicemente i waypoint
+---
+#Response:
+geometry_msgs/Point[] waypoints
+bool success
+string message

@@ -1,0 +1,23 @@
+#Ignoriamo alcune cartelle
+build/
+install/
+log/
+
+#File di cache Python, sono generati automaticamente da Python quando eseguiamo gli script
+__pycache__/
+*.pyc
+
+#File generati automaticamente da colcon
+*.egg-info/
+*.so
+
+#File temporanei dell'editor (VS Code, PyCharm, ecc)
+.vscode/
+.idea/
+
+#Repository o pacchetti esterni
+src/turtlebot3_simulations/
+
+#Test (servono per test automatici della qualità e conformità del codice
+src/robot_controller/test/
+

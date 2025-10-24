@@ -1,0 +1,8 @@
+#File di configurazione dei waypoint per il nodo waypoint_server
+#Ogni waypoint è una coppia [x, y], e tutte le distanze sono espresse in metri 
+
+waypoints:
+  - [0.0, 0.0]
+  - [1.0, 0.0]
+  - [1.0, 1.0]
+  - [0.0, 1.0]
