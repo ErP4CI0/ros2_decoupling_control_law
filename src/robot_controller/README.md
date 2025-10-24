@@ -1,58 +1,56 @@
-# Nodo `create_trajectory`
+# Nodo `waypoint_server`
 
 ## Descrizione generale
-Il nodo `create_trajectory` è responsabile della generazione di traiettorie di riferimento per il robot mobile TurtleBot Burger.  
-Le traiettorie possono essere **parametriche** (retta, cerchio, sinusoide, otto, quadrato) oppure definite tramite **waypoint** forniti da un service dedicato (`waypoint_server`).
+
+Il nodo **`waypoint_server`** è un nodo **ROS 2** scritto in Python che si occupa di fornire, tramite un **ROS Service**, una lista di **waypoint** (punti di riferimento nello spazio) ad altri nodi che ne hanno bisogno, in particolare al nodo `create_trajectory`.
+
+Lo scopo è quello di **separare la logica di generazione delle traiettorie** dalla **definizione dei punti di passaggio**, migliorando la **modularità** del sistema.  
+In pratica:
+- il nodo `waypoint_server` gestisce i **dati** (i waypoint);
+- il nodo `create_trajectory` si occupa di **generare le traiettorie** a partire da essi.
 
 ---
 
-## Funzionalità principali
-- Richiede i waypoint al service `/get_waypoints`
-- Genera diverse tipologie di traiettorie (parametriche o spezzate)
-- Pubblica i riferimenti su `/reference_trajectory`
-- Gestisce il timeout e i casi di errore in modo sicuro
-- Permette la rigenerazione di una nuova traiettoria a runtime
+## ⚙️ Funzionamento
+
+Quando il nodo viene avviato, esegue i seguenti passaggi:
+
+1. **Lettura del file YAML**
+   - Il nodo cerca un file `waypoints.yaml` che contiene le coordinate dei punti da inviare.
+   - Il file deve avere questa struttura:
+
+     ```yaml
+     waypoints:
+       - [0.0, 0.0]
+       - [2.0, 0.0]
+       - [3.0, 2.0]
+       - [4.0, 2.5]
+     ```
+
+   - Ogni riga rappresenta un punto `(x, y)` nello spazio.
+
+2. **Creazione del service `/get_waypoints`**
+   - Il nodo pubblica un **service** denominato `/get_waypoints`, definito nel file:
+     ```
+     robot_interfaces/srv/GetWaypoints.srv
+     ```
+   - Quando un client (come `create_trajectory`) invia una richiesta, il server:
+     - legge i waypoint dal file YAML;
+     - li converte in messaggi ROS (`geometry_msgs/Point`);
+     - restituisce la lista al client;
+     - include anche un flag di successo (`success`) e un messaggio di stato (`message`).
+
+3. **Gestione degli errori**
+   - Se il file YAML non esiste, non è leggibile o non contiene waypoint validi:
+     - `success = False`
+     - `message = "Errore nella lettura del file YAML"`
+   - In questo caso, il nodo client (ad esempio `create_trajectory`) può usare dei **waypoint di default**.
 
 ---
 
-## Topic e Service
+## 🧩 Definizione del Service
 
-### Topic
-| Nome | Tipo | Direzione | Descrizione |
-|------|------|------------|--------------|
-| `/reference_trajectory` | `robot_interfaces/msg/Trajectory` | Pubblicato | Traiettoria desiderata per il controllore |
-| `/odom` | `nav_msgs/msg/Odometry` | Sottoscritto | Odometria del robot per allineamento iniziale |
-
-### Service
-| Nome | Tipo | Ruolo | Descrizione |
-|------|------|-------|--------------|
-| `/get_waypoints` | `robot_interfaces/srv/GetWaypoints` | Client | Ottiene i waypoint dal nodo `waypoint_server` |
-
----
-
-## Parametri ROS2
-
-| Nome | Tipo | Default | Descrizione |
-|------|------|----------|-------------|
-| `hz` | `float` | `20.0` | Frequenza operativa del nodo |
-| `front_point` | `float` | `0.10` | Distanza del punto anteriore rispetto al baricentro |
-
----
-
-## Tipologie di traiettoria supportate
-- `retta`
-- `sinusoide`
-- `cerchio`
-- `otto`
-- `quadrato`
-- `spezzata`
-- `smooth`
-
----
-
-## Esecuzione del nodo
-
-Avviare il nodo dopo che il server `waypoint_server` è in esecuzione:
+Il service è definito nel file:
 
 ```bash
-ros2 run robot_controller create_trajectory
+robot_interfaces/srv/GetWaypoints.srv
