@@ -18,17 +18,17 @@ class WaypointServer(Node):
         #Log di informazione
         self.get_logger().info("il Service 'get_waypoints' è attivo e in attesa di richieste")
 
-        #Dichiriamo un parametro ROS2 chiamato waypoint_file e gli assegniamo un valore di defualt (percorso relativo del file)
+        #Dichiariamo un parametro ROS2 chiamato waypoint_file e gli assegniamo un valore di defualt (percorso relativo del file).
         #Tale valore può essere modificato per esempio quando lanciamo il nodo da CLI
         self.declare_parameter('waypoint_file', 'config/waypoints.yaml')
-        #Otteniamo il valore attuale del parametro waypoint_file, ne estrae il valore
-        #Il metodo get_parameter() resituisce un oggetto Paramter
+        #Otteniamo il valore attuale del parametro waypoint_file, ne estrae il valore.
+        #Il metodo get_parameter() resituisce un oggetto Paramter.
         self.file_path = self.get_parameter('waypoint_file').value
 
-        #Caricamento dei waypoint, li leggiamo dal file di configurazione se possibile
+        #Caricamento dei waypoint: li leggiamo dal file di configurazione se possibile
         self.waypoints = self.load_waypoints_from_file(self.file_path)
 
-        #Se non ci sono waypoint nel file, passiamo alla modalità interattiva
+        #Se non ci sono waypoint nel file (oppure non esiste), passiamo alla modalità interattiva
         if not self.waypoints:
             self.get_logger().warn("Nessun file trovato oppure è vuoto. Passo alla modalità interattiva...")
             self.waypoints = self.ask_waypoints_interactively()

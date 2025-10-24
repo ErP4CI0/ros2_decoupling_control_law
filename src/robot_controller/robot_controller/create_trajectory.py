@@ -78,7 +78,7 @@ class CreateTrajectory(Node):
         #Eseguiamo la chiamata in modo asincrono
         future = self.client.call_async(req)
 
-        #Restiamo in attesa della risposta con un timeout
+        #Restiamo in attesa della risposta con un timeout (OSS: lo spin è attivo!)
         rclpy.spin_until_future_complete(self, future, timeout_sec=timeout_sec)
 
         #Nessuna risposta entro il timeout
@@ -188,7 +188,7 @@ class CreateTrajectory(Node):
             rclpy.shutdown() #Termina l'esecuzione dello spin ed eseguirà il blocco finally
             return #interrompiamo l'esecuzione di questo metodo altrimenti proseguirebbe sotto
 
-        #Prendiamo il qauternione e ne calcoliamo lo yaw attuale, qui il msg Odometry è sofisticato, guarda tu stesso
+        #Prendiamo il quaternione e ne calcoliamo lo yaw attuale, qui il msg Odometry è sofisticato, guarda tu stesso
         quaternion = init_msg.pose.pose.orientation
         init_theta = yaw_from_quaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w)
         #Calcoliamo la posizione iniziale del punto anteriore attuale
